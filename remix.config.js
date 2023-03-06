@@ -9,4 +9,8 @@ module.exports = {
   // appDirectory: "app",
   // assetsBuildDirectory: "public/build",
   // publicPath: "/build/",
+  unstable_tailwind: true,
+  future: {
+    v2_routeConvention: true,
+  },
 };
