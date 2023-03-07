@@ -4,7 +4,9 @@
   "scripts": {
     "build": "remix build",
     "dev": "remix dev",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "lint": "eslint --ext .tsx,.jsx,.js,.ts --ignore-path .gitignore app",
+    "lint-fix": "eslint --ext .tsx,.jsx,.js,.ts --ignore-path .gitignore --fix app"
   },
   "dependencies": {
     "@fontsource/roboto": "^4.5.8",

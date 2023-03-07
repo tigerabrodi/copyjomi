@@ -1,4 +1,8 @@
-import type { LinksFunction, MetaFunction } from "@remix-run/node";
+import type { LinksFunction, MetaFunction } from '@remix-run/node'
+
+import Roboto400 from '@fontsource/roboto/400.css'
+import Roboto500 from '@fontsource/roboto/500.css'
+import Roboto700 from '@fontsource/roboto/700.css'
 import {
   Links,
   LiveReload,
@@ -6,25 +10,23 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-} from "@remix-run/react";
-import styles from "./tailwind.css";
-import Roboto400 from "@fontsource/roboto/400.css";
-import Roboto500 from "@fontsource/roboto/500.css";
-import Roboto700 from "@fontsource/roboto/700.css";
+} from '@remix-run/react'
+
+import styles from './tailwind.css'
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: styles },
-  { rel: "stylesheet", href: Roboto400 },
-  { rel: "stylesheet", href: Roboto500 },
-  { rel: "stylesheet", href: Roboto700 },
-];
+  { rel: 'stylesheet', href: styles },
+  { rel: 'stylesheet', href: Roboto400 },
+  { rel: 'stylesheet', href: Roboto500 },
+  { rel: 'stylesheet', href: Roboto700 },
+]
 
 export const meta: MetaFunction = () => ({
-  charset: "utf-8",
-  title: "Copyjomi",
-  description: "",
-  viewport: "width=device-width,initial-scale=1",
-});
+  charset: 'utf-8',
+  title: 'Copyjomi',
+  description: '',
+  viewport: 'width=device-width,initial-scale=1',
+})
 
 export default function App() {
   return (
@@ -40,5 +42,5 @@ export default function App() {
         <LiveReload />
       </body>
     </html>
-  );
+  )
 }
