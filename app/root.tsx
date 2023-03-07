@@ -8,8 +8,16 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import styles from "./tailwind.css";
+import Roboto400 from "@fontsource/roboto/400.css";
+import Roboto500 from "@fontsource/roboto/500.css";
+import Roboto700 from "@fontsource/roboto/700.css";
 
-export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: styles },
+  { rel: "stylesheet", href: Roboto400 },
+  { rel: "stylesheet", href: Roboto500 },
+  { rel: "stylesheet", href: Roboto700 },
+];
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
@@ -25,7 +33,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="bg-slate-900">
         <Outlet />
         <ScrollRestoration />
         <Scripts />
