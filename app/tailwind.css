@@ -1,3 +1,58 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  *,
+  *::after,
+  *::before {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+  }
+
+  html {
+    height: 100%;
+  }
+
+  body {
+    box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 1px solid white;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px black;
+  }
+
+  button {
+    border: none;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  input,
+  textarea {
+    border: none;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: inherit;
+    opacity: 0.6;
+  }
+}
