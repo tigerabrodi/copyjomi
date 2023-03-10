@@ -1,22 +1,30 @@
+import type { DataFunctionArgs } from '@remix-run/node'
+
 import { Listbox } from '@headlessui/react'
 import { ChevronUpDownIcon } from '@heroicons/react/20/solid'
-import { DataFunctionArgs } from '@remix-run/node'
-import { Form, Link } from '@remix-run/react'
+import { Form, Link, useActionData, useTransition } from '@remix-run/react'
 import { useState } from 'react'
 import { z } from 'zod'
 import { zfd } from 'zod-form-data'
 
+import { choiceSchema, contentNames } from '~/schemas'
+import { parseContent } from '~/utils'
+import { generatePromptWithContentAndType } from '~/utils/generatePromptWithContentAndType'
+
 const SELECTED_CONTENT_TYPE_NAME = 'selectedContentType'
 
 const typeOfContents = [
-  { id: 1, name: 'Headline' },
-  { id: 2, name: 'Text' },
-  { id: 3, name: 'Twitter' },
-  { id: 4, name: 'LinkedIn' },
+  { id: 1, name: contentNames.headline },
+  { id: 2, name: contentNames.text },
+  { id: 3, name: contentNames.twitter },
+  { id: 4, name: contentNames.linkedin },
 ] as const
 
 export default function Index() {
-  const [selectedContent, setSelectedContent] = useState(typeOfContents[0])
+  const [selectedContent, setSelectedContent] = useState(typeOfContents[3])
+  const actionData = useActionData<typeof action>()
+  const transition = useTransition()
+  const isSubmitting = transition.state === 'submitting'
 
   return (
     <>
@@ -36,7 +44,10 @@ export default function Index() {
           </p>
         </div>
 
-        <Form className="mt-20 flex w-[655px] flex-col items-center [row-gap:30px]">
+        <Form
+          className="mt-20 flex w-[655px] flex-col items-center [row-gap:30px]"
+          method="post"
+        >
           <div className="relative flex w-full flex-col [row-gap:15px]">
             <label htmlFor="select" className="text-xl font-medium text-white">
               Type of content
@@ -86,20 +97,22 @@ export default function Index() {
           <button
             type="submit"
             className="mt-11 rounded-sm bg-white px-[10px] py-2 text-lg font-bold text-navy-dark hover:bg-navy-light"
+            disabled={isSubmitting}
           >
-            Generate new content
+            {isSubmitting ? 'Generating content...' : 'Generate better content'}
           </button>
         </Form>
 
         <div className="mt-16 flex flex-col items-center">
           <h2 className="mb-4 text-4xl font-medium text-white">Results</h2>
 
-          <p className="max-w-3xl rounded-md bg-white p-2 text-lg leading-5 text-navy-medium">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat.
-          </p>
+          {actionData?.contents.map((content, index) => (
+            <textarea
+              className="mt-2 max-w-3xl rounded-md bg-white p-2 text-lg leading-5 text-navy-medium"
+              key={index}
+              value={content}
+            />
+          ))}
         </div>
       </main>
     </>
@@ -108,13 +121,78 @@ export default function Index() {
 
 const FormSchema = zfd.formData(
   z.object({
-    [SELECTED_CONTENT_TYPE_NAME]: z.string(),
+    [SELECTED_CONTENT_TYPE_NAME]: z.union([
+      z.literal(contentNames.headline),
+      z.literal(contentNames.text),
+      z.literal(contentNames.twitter),
+      z.literal(contentNames.linkedin),
+    ]),
     content: z.string(),
   })
 )
+
+const responseSchema = z.array(choiceSchema)
 
 export async function action({ request }: DataFunctionArgs) {
   const { content, selectedContentType } = FormSchema.parse(
     await request.formData()
   )
+
+  const prompt = generatePromptWithContentAndType({
+    content,
+    selectedContentType,
+  })
+
+  const payload = {
+    model: 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.7,
+    top_p: 1,
+    frequency_penalty: 0.5,
+    presence_penalty: 0.5,
+    max_tokens: 2000,
+  }
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+
+  const data = await response.json()
+
+  const choices = responseSchema.parse(data.choices)
+  const choice = choices[0]
+
+  const contents = parseContent(choice.message.content)
+
+  console.log('contents', contents)
+  console.log('choice', choice)
+
+  return { contents }
 }
+
+// content: '\n' +
+//   '\n' +
+//   '1. Are you ready for the worst-case scenario? \n' +
+//   '\n' +
+//   "Your job might not be as secure as you think. Make sure you have a backup plan in case of unexpected layoffs or economic downturns. It's always better to be prepared than caught off guard. \n" +
+//   '\n' +
+//   'Be proactive and take charge of your career path today. \n' +
+//   '\n' +
+//   "2. Don't let loyalty cloud your judgment. \n" +
+//   '\n' +
+//   "While it's great to have a sense of belonging and camaraderie at work, remember that your company is still a business entity with its own interests and priorities. Be aware of your own financial and professional goals, and don't hesitate to take action if they're not aligned with the company's direction.\n" +
+//   '\n' +
+//   'Stay true to yourself, even when the going gets tough.\n' +
+//   '\n' +
+//   "3. The truth about job security: it's all up to you.\n" +
+//   '\n' +
+//   "No matter how much you love your job or how long you've been with your company, there's always a chance of unexpected changes in the industry, economy or leadership.\n" +
+//   '\n' +
+//   "But here's the good news: YOU are in control of your own skills, network and adaptability. Invest in continuous learning and personal branding so that you can navigate any challenge that comes your way.\n" +
+//   '\n' +
+//   'Remember: Your career is yours alone - make it count!'
