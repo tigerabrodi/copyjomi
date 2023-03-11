@@ -1,11 +1,9 @@
-export function parseContent(content: string) {
-  const regex = /\d+\.\s+(.+?)(?=\n\d+\.\s+|$)/gs
-  const matches = content.matchAll(regex)
-  const result = []
+export const parseContent = (content: string): string => {
+  // remove the first two newlines
+  const formattedContent = content.replace(/^\n{2}/, '')
 
-  for (const match of matches) {
-    result.push(match[1].trim())
-  }
+  // remove any leading or trailing whitespace
+  const trimmedContent = formattedContent.trim()
 
-  return result
+  return trimmedContent
 }
