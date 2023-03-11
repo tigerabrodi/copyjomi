@@ -3,7 +3,7 @@ import type { DataFunctionArgs } from '@remix-run/node'
 import { Listbox } from '@headlessui/react'
 import { ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import { Form, Link, useActionData, useTransition } from '@remix-run/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { zfd } from 'zod-form-data'
 
@@ -21,10 +21,17 @@ const typeOfContents = [
 ] as const
 
 export default function Index() {
-  const [selectedContent, setSelectedContent] = useState(typeOfContents[3])
+  const [selectedContent, setSelectedContent] = useState(typeOfContents[0])
   const actionData = useActionData<typeof action>()
+  const [content, setContent] = useState(actionData?.parsedContent ?? '')
   const transition = useTransition()
   const isSubmitting = transition.state === 'submitting'
+
+  useEffect(() => {
+    if (actionData?.parsedContent) {
+      setContent(actionData.parsedContent)
+    }
+  }, [actionData])
 
   return (
     <>
@@ -45,7 +52,7 @@ export default function Index() {
         </div>
 
         <Form
-          className="mt-20 flex w-[655px] flex-col items-center [row-gap:30px]"
+          className="mt-20 flex w-[800px] flex-col items-center [row-gap:30px]"
           method="post"
         >
           <div className="relative flex w-full flex-col [row-gap:15px]">
@@ -84,7 +91,7 @@ export default function Index() {
               name="content"
               id="content"
               required
-              className="h-48 w-full rounded-sm bg-white pl-3 pt-3 text-lg font-medium text-navy-dark"
+              className="h-80 w-full rounded-sm bg-white pl-3 pt-3 text-lg font-medium text-navy-dark"
             />
           </div>
 
@@ -106,13 +113,13 @@ export default function Index() {
         <div className="mt-16 flex flex-col items-center">
           <h2 className="mb-4 text-4xl font-medium text-white">Results</h2>
 
-          {actionData?.contents.map((content, index) => (
+          {actionData?.parsedContent && (
             <textarea
-              className="mt-2 max-w-3xl rounded-md bg-white p-2 text-lg leading-5 text-navy-medium"
-              key={index}
+              className="mt-4 h-72 w-[750px] whitespace-pre-wrap rounded-md bg-white p-2 text-lg leading-5 text-navy-dark"
               value={content}
+              onChange={(event) => setContent(event.target.value)}
             />
-          ))}
+          )}
         </div>
       </main>
     </>
@@ -150,7 +157,7 @@ export async function action({ request }: DataFunctionArgs) {
     top_p: 1,
     frequency_penalty: 0.5,
     presence_penalty: 0.5,
-    max_tokens: 2000,
+    max_tokens: 3000,
   }
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -167,32 +174,7 @@ export async function action({ request }: DataFunctionArgs) {
   const choices = responseSchema.parse(data.choices)
   const choice = choices[0]
 
-  const contents = parseContent(choice.message.content)
+  const parsedContent = parseContent(choice.message.content)
 
-  console.log('contents', contents)
-  console.log('choice', choice)
-
-  return { contents }
+  return { parsedContent }
 }
-
-// content: '\n' +
-//   '\n' +
-//   '1. Are you ready for the worst-case scenario? \n' +
-//   '\n' +
-//   "Your job might not be as secure as you think. Make sure you have a backup plan in case of unexpected layoffs or economic downturns. It's always better to be prepared than caught off guard. \n" +
-//   '\n' +
-//   'Be proactive and take charge of your career path today. \n' +
-//   '\n' +
-//   "2. Don't let loyalty cloud your judgment. \n" +
-//   '\n' +
-//   "While it's great to have a sense of belonging and camaraderie at work, remember that your company is still a business entity with its own interests and priorities. Be aware of your own financial and professional goals, and don't hesitate to take action if they're not aligned with the company's direction.\n" +
-//   '\n' +
-//   'Stay true to yourself, even when the going gets tough.\n' +
-//   '\n' +
-//   "3. The truth about job security: it's all up to you.\n" +
-//   '\n' +
-//   "No matter how much you love your job or how long you've been with your company, there's always a chance of unexpected changes in the industry, economy or leadership.\n" +
-//   '\n' +
-//   "But here's the good news: YOU are in control of your own skills, network and adaptability. Invest in continuous learning and personal branding so that you can navigate any challenge that comes your way.\n" +
-//   '\n' +
-//   'Remember: Your career is yours alone - make it count!'
