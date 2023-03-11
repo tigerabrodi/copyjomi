@@ -18,6 +18,6 @@ export const messageSchema = z.object({
 
 export const choiceSchema = z.object({
   message: messageSchema,
-  finish_reason: z.string(),
+  finish_reason: z.string().nullable(),
   index: z.number(),
 })
