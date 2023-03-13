@@ -68,7 +68,7 @@ export default function Index() {
                   className="h-5 w-5 text-navy-dark"
                 />
               </Listbox.Button>
-              <Listbox.Options className="absolute top-24 flex w-[655px] flex-col overflow-auto rounded-sm bg-white p-1 [row-gap:8px]">
+              <Listbox.Options className="absolute top-24 flex w-[800px] flex-col overflow-auto rounded-sm bg-white p-1 [row-gap:8px]">
                 {typeOfContents.map((content) => (
                   <Listbox.Option
                     key={content.id}
