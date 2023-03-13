@@ -4,7 +4,6 @@ export type ValueOf<T> = T[keyof T]
 
 export const contentNames = {
   headline: 'Headline',
-  text: 'Text',
   twitter: 'Twitter',
   linkedin: 'LinkedIn',
 } as const
