@@ -15,7 +15,6 @@ const SELECTED_CONTENT_TYPE_NAME = 'selectedContentType'
 
 const typeOfContents = [
   { id: 1, name: contentNames.headline },
-  { id: 2, name: contentNames.text },
   { id: 3, name: contentNames.twitter },
   { id: 4, name: contentNames.linkedin },
 ] as const
@@ -111,7 +110,7 @@ export default function Index() {
         </Form>
 
         <div className="mt-16 flex flex-col items-center">
-          <h2 className="mb-4 text-4xl font-medium text-white">Results</h2>
+          <h2 className="mb-4 text-4xl font-medium text-white">Result</h2>
 
           {actionData?.parsedContent && (
             <textarea
@@ -130,7 +129,6 @@ const FormSchema = zfd.formData(
   z.object({
     [SELECTED_CONTENT_TYPE_NAME]: z.union([
       z.literal(contentNames.headline),
-      z.literal(contentNames.text),
       z.literal(contentNames.twitter),
       z.literal(contentNames.linkedin),
     ]),
